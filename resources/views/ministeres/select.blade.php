@@ -1,28 +1,40 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8">Sélectionnez votre ministère</h1>
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8 border-t-4 border-amber-700">
+            <h1 class="text-3xl font-bold mb-2 text-amber-900">Plateforme de Collecte</h1>
+            <p class="text-gray-600 mb-8">Veuillez sélectionner votre ministère</p>
 
-        @if($ministeres->isEmpty())
-            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
-                Aucun ministère disponible pour le moment.
-            </div>
-        @else
-            <div class="grid gap-4">
-                @foreach($ministeres as $ministere)
-                    <a href="{{ route('data-collections.create', $ministere) }}" 
-                       class="block p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ $ministere->name }}</h2>
-                        <p class="text-gray-600 mb-2">Code: <span class="font-mono">{{ $ministere->code }}</span></p>
-                        @if($ministere->description)
-                            <p class="text-gray-600">{{ $ministere->description }}</p>
-                        @endif
-                    </a>
-                @endforeach
-            </div>
-        @endif
+            @if($ministeres->isEmpty())
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
+                    Aucun ministère disponible pour le moment.
+                </div>
+            @else
+                <form action="#" method="POST">
+                    @csrf
+                    <div class="mb-6">
+                        <label for="ministere" class="block text-gray-700 font-semibold mb-3">
+                            Ministère *
+                        </label>
+                        <select id="ministere" name="ministere_id" 
+                                class="w-full px-4 py-3 border-2 border-amber-200 rounded-lg focus:outline-none focus:border-amber-600 bg-white text-gray-800"
+                                onchange="if(this.value) alert('Ministère sélectionné: ' + this.options[this.selectedIndex].text)">
+                            <option value="">-- Choisissez votre ministère --</option>
+                            @foreach($ministeres as $ministere)
+                                <option value="{{ $ministere->id }}">{{ $ministere->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        Continuer
+                    </button>
+                </form>
+            @endif
+        </div>
     </div>
 </div>
 @endsection

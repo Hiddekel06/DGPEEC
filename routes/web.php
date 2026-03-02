@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MinisteireController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [MinisteireController::class, 'selectIndex'])->name('ministeres.select');

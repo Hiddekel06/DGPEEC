@@ -12,9 +12,4 @@ class MinisteireController extends Controller
         $ministeres = Ministere::orderBy('name')->get();
         return view('ministeres.select', compact('ministeres'));
     }
-
-    public function show(Ministere $ministere): View
-    {
-        return view('ministeres.show', compact('ministere'));
-    }
 }
