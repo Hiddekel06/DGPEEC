@@ -14,8 +14,21 @@ class DataCollectionController extends Controller
 {
     public function showForm(Ministere $ministere): View
     {
+        // Vérifier si l'agent appartient à une direction
+        $directionId = session()->get("agent_direction_{$ministere->id}");
+        
         // Récupérer la configuration du formulaire
-        $formConfig = FormConfig::where('ministere_id', $ministere->id)->first();
+        if ($directionId) {
+            // Charger le formulaire spécifique à la direction
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->where('direction_id', $directionId)
+                                    ->first();
+        } else {
+            // Charger le formulaire général du ministère
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->whereNull('direction_id')
+                                    ->first();
+        }
 
         if (!$formConfig) {
             abort(404, 'Aucun formulaire disponible pour ce ministère.');
@@ -39,8 +52,19 @@ class DataCollectionController extends Controller
             return redirect()->back()->withErrors(['Erreur de sécurité : formulaire invalide']);
         }
 
+        // Vérifier si l'agent appartient à une direction
+        $directionId = session()->get("agent_direction_{$ministere->id}");
+        
         // Récupérer la config du formulaire pour validation dynamique
-        $formConfig = FormConfig::where('ministere_id', $ministere->id)->first();
+        if ($directionId) {
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->where('direction_id', $directionId)
+                                    ->first();
+        } else {
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->whereNull('direction_id')
+                                    ->first();
+        }
 
         if (!$formConfig) {
             abort(404);
@@ -52,6 +76,10 @@ class DataCollectionController extends Controller
             $fieldRules = [];
             if ($field['required']) {
                 $fieldRules[] = 'required';
+            }
+            if ($field['type'] === 'number') {
+                $fieldRules[] = 'integer';
+                $fieldRules[] = 'min:0';
             }
             if ($field['type'] === 'date') {
                 $fieldRules[] = 'date';
@@ -68,18 +96,26 @@ class DataCollectionController extends Controller
 
         $validated = $request->validate($rules, [
             'form_data.matricule.regex' => 'Le matricule doit contenir au moins 6 chiffres suivis d\'une lettre majuscule (ex: 123456A).',
-            'form_data.matricule.unique' => 'Ce matricule a déjà été utilisé pour soumettre des données.'
+            'form_data.matricule.unique' => 'Ce matricule a déjà été utilisé pour soumettre des données.',
+            'form_data.*.integer' => 'Les champs numériques doivent contenir des entiers.',
+            'form_data.*.min' => 'Les champs numériques ne peuvent pas être négatifs.',
         ]);
 
-        // Normaliser le matricule
-        $matricule = strtoupper(trim($validated['form_data']['matricule']));
-        $validated['form_data']['matricule'] = $matricule;
+        $formData = $validated['form_data'] ?? [];
+        $formData = $this->applyComputedTotals($formConfig->fields, $formData);
+
+        // Normaliser le matricule si présent
+        $matricule = null;
+        if (isset($formData['matricule']) && filled($formData['matricule'])) {
+            $matricule = strtoupper(trim($formData['matricule']));
+            $formData['matricule'] = $matricule;
+        }
 
         // Créer la soumission
         DataCollection::create([
             'matricule' => $matricule,
             'ministere_id' => $ministere->id,
-            'form_data' => $validated['form_data']
+            'form_data' => $formData
         ]);
 
         // Nettoyer le token
@@ -95,8 +131,19 @@ class DataCollectionController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
+        // Vérifier si l'agent appartient à une direction
+        $directionId = session()->get("agent_direction_{$ministere->id}");
+        
         // Récupérer la configuration du formulaire
-        $formConfig = FormConfig::where('ministere_id', $ministere->id)->first();
+        if ($directionId) {
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->where('direction_id', $directionId)
+                                    ->first();
+        } else {
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->whereNull('direction_id')
+                                    ->first();
+        }
 
         if (!$formConfig) {
             abort(404, 'Aucun formulaire disponible pour ce ministère.');
@@ -123,8 +170,19 @@ class DataCollectionController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
+        // Vérifier si l'agent appartient à une direction
+        $directionId = session()->get("agent_direction_{$ministere->id}");
+        
         // Récupérer la config du formulaire
-        $formConfig = FormConfig::where('ministere_id', $ministere->id)->first();
+        if ($directionId) {
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->where('direction_id', $directionId)
+                                    ->first();
+        } else {
+            $formConfig = FormConfig::where('ministere_id', $ministere->id)
+                                    ->whereNull('direction_id')
+                                    ->first();
+        }
 
         if (!$formConfig) {
             abort(404);
@@ -137,6 +195,10 @@ class DataCollectionController extends Controller
             if ($field['required']) {
                 $fieldRules[] = 'required';
             }
+            if ($field['type'] === 'number') {
+                $fieldRules[] = 'integer';
+                $fieldRules[] = 'min:0';
+            }
             if ($field['type'] === 'date') {
                 $fieldRules[] = 'date';
             }
@@ -145,12 +207,18 @@ class DataCollectionController extends Controller
             }
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'form_data.*.integer' => 'Les champs numériques doivent contenir des entiers.',
+            'form_data.*.min' => 'Les champs numériques ne peuvent pas être négatifs.',
+        ]);
+
+        $formData = $validated['form_data'] ?? [];
+        $formData = $this->applyComputedTotals($formConfig->fields, $formData);
 
         // Vérifier l'unicité Prénom+Nom pour le CFJ
         $existingRecord = DataCollection::where('ministere_id', $ministere->id)
-            ->whereJsonContains('form_data->prenom', $validated['form_data']['prenom'])
-            ->whereJsonContains('form_data->nom', $validated['form_data']['nom'])
+            ->whereJsonContains('form_data->prenom', $formData['prenom'])
+            ->whereJsonContains('form_data->nom', $formData['nom'])
             ->first();
 
         if ($existingRecord) {
@@ -178,7 +246,7 @@ class DataCollectionController extends Controller
         DataCollection::create([
             'matricule' => null,
             'ministere_id' => $ministere->id,
-            'form_data' => $validated['form_data']
+            'form_data' => $formData
         ]);
 
         return redirect()->route('form.success');
@@ -187,5 +255,35 @@ class DataCollectionController extends Controller
     public function success(): View
     {
         return view('data-collections.success');
+    }
+
+    private function applyComputedTotals(array $fields, array $formData): array
+    {
+        $tableFields = collect($fields)->filter(fn ($field) => isset($field['table'], $field['metric'], $field['role']));
+
+        if ($tableFields->isEmpty()) {
+            return $formData;
+        }
+
+        $grouped = $tableFields->groupBy(fn ($field) => $field['table'] . '::' . $field['metric']);
+
+        foreach ($grouped as $groupFields) {
+            $sum = 0;
+
+            foreach ($groupFields as $field) {
+                if (($field['role'] ?? 'item') === 'item') {
+                    $value = (int) ($formData[$field['name']] ?? 0);
+                    $sum += $value;
+                }
+            }
+
+            foreach ($groupFields as $field) {
+                if (($field['role'] ?? 'item') === 'total') {
+                    $formData[$field['name']] = $sum;
+                }
+            }
+        }
+
+        return $formData;
     }
 }

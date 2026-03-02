@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check.agent.auth' => \App\Http\Middleware\CheckAgentAuthentication::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'formulaire/*',
+            'formulaire-cfj/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

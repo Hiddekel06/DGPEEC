@@ -12,6 +12,7 @@ class FormConfig extends Model
 
     protected $fillable = [
         'ministere_id',
+        'direction_id',
         'fields',
     ];
 
@@ -22,5 +23,10 @@ class FormConfig extends Model
     public function ministere(): BelongsTo
     {
         return $this->belongsTo(Ministere::class);
+    }
+
+    public function direction(): BelongsTo
+    {
+        return $this->belongsTo(Direction::class);
     }
 }

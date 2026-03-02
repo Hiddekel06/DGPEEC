@@ -73,6 +73,9 @@
                     <!-- Grille responsive des champs -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @php
+                            // Vérifier si c'est un formulaire de type tableau (DSI)
+                            $hasTabularFields = collect($formConfig->fields)->contains(fn($f) => isset($f['table']) && isset($f['row_key']) && isset($f['metric']));
+
                             // Vérifier si c'est un formulaire BOM avec structures
                             $hasStructures = collect($formConfig->fields)->contains(fn($f) => isset($f['structure']));
                             if ($hasStructures) {
@@ -85,7 +88,83 @@
                             }
                         @endphp
 
-                        @if($hasStructures)
+                        @if($hasTabularFields)
+                            @php
+                                $tables = collect($formConfig->fields)->groupBy('table');
+                            @endphp
+
+                            @foreach($tables as $tableKey => $tableFields)
+                                @php
+                                    $tableLabel = $tableFields->first()['table_label'] ?? ucfirst(str_replace('_', ' ', $tableKey));
+                                    $rows = $tableFields->groupBy('row_key');
+                                @endphp
+
+                                <div class="md:col-span-2">
+                                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg p-4 mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-800">{{ $tableLabel }}</h3>
+                                    </div>
+
+                                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                                        <table class="min-w-full divide-y divide-gray-200 bg-white">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Structures / Objet</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nombre d’actes</th>
+                                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nombre d’agents concernés</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-100">
+                                                @foreach($rows as $rowKey => $rowFields)
+                                                    @php
+                                                        $actesField = $rowFields->firstWhere('metric', 'actes');
+                                                        $agentsField = $rowFields->firstWhere('metric', 'agents');
+                                                        $isTotalRow = ($actesField['role'] ?? 'item') === 'total' || ($agentsField['role'] ?? 'item') === 'total';
+                                                    @endphp
+
+                                                    <tr class="{{ $isTotalRow ? 'bg-emerald-50 font-semibold' : 'bg-white' }}">
+                                                        <td class="px-4 py-3 text-sm text-gray-800">{{ $actesField['row_label'] ?? $agentsField['row_label'] ?? '-' }}</td>
+                                                        <td class="px-4 py-3">
+                                                            @if($actesField)
+                                                                <input
+                                                                    type="number"
+                                                                    id="{{ $actesField['name'] }}"
+                                                                    name="form_data[{{ $actesField['name'] }}]"
+                                                                    value="{{ old('form_data.' . $actesField['name']) }}"
+                                                                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 {{ $isTotalRow ? 'bg-gray-100 border-gray-300' : 'border-gray-300' }}"
+                                                                    min="0"
+                                                                    data-table="{{ $tableKey }}"
+                                                                    data-metric="actes"
+                                                                    data-role="{{ $actesField['role'] ?? 'item' }}"
+                                                                    @if($isTotalRow) readonly @endif
+                                                                    @if($actesField['required']) required @endif
+                                                                >
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            @if($agentsField)
+                                                                <input
+                                                                    type="number"
+                                                                    id="{{ $agentsField['name'] }}"
+                                                                    name="form_data[{{ $agentsField['name'] }}]"
+                                                                    value="{{ old('form_data.' . $agentsField['name']) }}"
+                                                                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 {{ $isTotalRow ? 'bg-gray-100 border-gray-300' : 'border-gray-300' }}"
+                                                                    min="0"
+                                                                    data-table="{{ $tableKey }}"
+                                                                    data-metric="agents"
+                                                                    data-role="{{ $agentsField['role'] ?? 'item' }}"
+                                                                    @if($isTotalRow) readonly @endif
+                                                                    @if($agentsField['required']) required @endif
+                                                                >
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @elseif($hasStructures)
                             {{-- Affichage structuré pour BOM --}}
                             @php
                                 $fieldsByStructure = collect($formConfig->fields)->groupBy('structure');
@@ -190,6 +269,42 @@
                             @endforeach
                         @endif
                     </div>
+
+                    @if($hasTabularFields)
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const recalculateTableTotals = function (tableKey, metric) {
+                                    let sum = 0;
+                                    document.querySelectorAll(`input[data-table="${tableKey}"][data-metric="${metric}"][data-role="item"]`).forEach((input) => {
+                                        const value = parseInt(input.value || '0', 10);
+                                        sum += Number.isNaN(value) ? 0 : value;
+                                    });
+
+                                    const totalInput = document.querySelector(`input[data-table="${tableKey}"][data-metric="${metric}"][data-role="total"]`);
+                                    if (totalInput) {
+                                        totalInput.value = sum;
+                                    }
+                                };
+
+                                const itemInputs = document.querySelectorAll('input[data-role="item"]');
+                                itemInputs.forEach((input) => {
+                                    input.addEventListener('input', function () {
+                                        recalculateTableTotals(this.dataset.table, this.dataset.metric);
+                                    });
+                                });
+
+                                const tableMetricPairs = new Set();
+                                itemInputs.forEach((input) => {
+                                    tableMetricPairs.add(`${input.dataset.table}::${input.dataset.metric}`);
+                                });
+
+                                tableMetricPairs.forEach((pair) => {
+                                    const [table, metric] = pair.split('::');
+                                    recalculateTableTotals(table, metric);
+                                });
+                            });
+                        </script>
+                    @endif
 
                     <!-- Actions du formulaire -->
                     <div class="mt-8 pt-6 border-t border-gray-200">

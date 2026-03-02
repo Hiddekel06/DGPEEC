@@ -23,4 +23,9 @@ class Ministere extends Model
     {
         return $this->hasMany(DataCollection::class);
     }
+
+    public function directions(): HasMany
+    {
+        return $this->hasMany(Direction::class);
+    }
 }

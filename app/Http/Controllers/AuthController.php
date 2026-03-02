@@ -50,6 +50,11 @@ class AuthController extends Controller
         // Créer une session d'authentification
         Session::put("agent_authenticated_{$ministere->id}", true);
         Session::put("agent_email_{$ministere->id}", $agent->email);
+        
+        // Si l'agent appartient à une direction, stocker l'ID de la direction
+        if ($agent->direction_id) {
+            Session::put("agent_direction_{$ministere->id}", $agent->direction_id);
+        }
 
         return redirect()->route('form.show', $ministere);
     }
@@ -58,6 +63,7 @@ class AuthController extends Controller
     {
         Session::forget("agent_authenticated_{$ministere->id}");
         Session::forget("agent_email_{$ministere->id}");
+        Session::forget("agent_direction_{$ministere->id}");
 
         return redirect()->route('ministeres.select');
     }

@@ -219,6 +219,7 @@ class FormConfigSeeder extends Seeder
         if ($bomMinistere) {
             FormConfig::create([
                 'ministere_id' => $bomMinistere->id,
+                'direction_id' => null,
                 'fields' => [
                     // Présidence de la République
                     ['name' => 'presidence_demandes', 'label' => 'Présidence de la République', 'sublabel' => 'Nombre de demandes reçues', 'type' => 'number', 'required' => true, 'structure' => 'presidence'],
@@ -241,6 +242,113 @@ class FormConfigSeeder extends Seeder
                     ['name' => 'total_montant', 'label' => 'Total', 'sublabel' => 'Montant', 'type' => 'number', 'required' => true, 'structure' => 'total'],
                 ]
             ]);
+        }
+
+        // Configurations pour les directions du MFP
+        $mfpMinistere = Ministere::where('code', 'MFP')->first();
+        
+        if ($mfpMinistere) {
+            // FormConfig pour DSI
+            $dsi = \App\Models\Direction::where('code', 'DSI')->first();
+            if ($dsi) {
+                FormConfig::create([
+                    'ministere_id' => $mfpMinistere->id,
+                    'direction_id' => $dsi->id,
+                    'fields' => [
+                        // Tableau 1 : Format
+                        ['name' => 'dsi_t1_physique_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_1', 'table_label' => 'Répartition du nombre d’actes mis en ligne format et le nombre d’agents en 2025', 'row_key' => 'physique', 'row_label' => 'Physique', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t1_physique_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_1', 'table_label' => 'Répartition du nombre d’actes mis en ligne format et le nombre d’agents en 2025', 'row_key' => 'physique', 'row_label' => 'Physique', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t1_electronique_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_1', 'table_label' => 'Répartition du nombre d’actes mis en ligne format et le nombre d’agents en 2025', 'row_key' => 'electronique', 'row_label' => 'Electronique', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t1_electronique_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_1', 'table_label' => 'Répartition du nombre d’actes mis en ligne format et le nombre d’agents en 2025', 'row_key' => 'electronique', 'row_label' => 'Electronique', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t1_total_actes', 'type' => 'number', 'required' => false, 'table' => 'tableau_1', 'table_label' => 'Répartition du nombre d’actes mis en ligne format et le nombre d’agents en 2025', 'row_key' => 'total', 'row_label' => 'Total', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'total'],
+                        ['name' => 'dsi_t1_total_agents', 'type' => 'number', 'required' => false, 'table' => 'tableau_1', 'table_label' => 'Répartition du nombre d’actes mis en ligne format et le nombre d’agents en 2025', 'row_key' => 'total', 'row_label' => 'Total', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'total'],
+
+                        // Tableau 2 : Statut / cadre
+                        ['name' => 'dsi_t2_enseignement_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'enseignement', 'row_label' => 'Fonctionnaires de l\'enseignement', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t2_enseignement_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'enseignement', 'row_label' => 'Fonctionnaires de l\'enseignement', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t2_autres_fonctionnaires_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'autres_fonctionnaires', 'row_label' => 'Autres agents fonctionnaires de l\'Etat', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t2_autres_fonctionnaires_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'autres_fonctionnaires', 'row_label' => 'Autres agents fonctionnaires de l\'Etat', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t2_non_fonctionnaires_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'non_fonctionnaires', 'row_label' => 'Agents non fonctionnaire de l\'Etat', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t2_non_fonctionnaires_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'non_fonctionnaires', 'row_label' => 'Agents non fonctionnaire de l\'Etat', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t2_total_actes', 'type' => 'number', 'required' => false, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'total', 'row_label' => 'Total', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'total'],
+                        ['name' => 'dsi_t2_total_agents', 'type' => 'number', 'required' => false, 'table' => 'tableau_2', 'table_label' => 'Répartition du nombre d’actes mis en ligne selon le statut ou le cadre', 'row_key' => 'total', 'row_label' => 'Total', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'total'],
+
+                        // Tableau 3 : Objet d'actes
+                        ['name' => 'dsi_t3_validation_anciennete_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'validation_anciennete', 'row_label' => 'Validation d\'ancienneté', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_validation_anciennete_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'validation_anciennete', 'row_label' => 'Validation d\'ancienneté', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_avancement_grade_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'avancement_grade', 'row_label' => 'Avancement de grade', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_avancement_grade_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'avancement_grade', 'row_label' => 'Avancement de grade', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_nomination_titularisation_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'nomination_titularisation', 'row_label' => 'Nomination et titularisation', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_nomination_titularisation_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'nomination_titularisation', 'row_label' => 'Nomination et titularisation', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_avancement_echelon_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'avancement_echelon', 'row_label' => 'Avancement d\'échelon', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_avancement_echelon_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'avancement_echelon', 'row_label' => 'Avancement d\'échelon', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_engagement_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'engagement', 'row_label' => 'Engagement', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_engagement_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'engagement', 'row_label' => 'Engagement', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_regularisation_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'regularisation', 'row_label' => 'Régularisation', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_regularisation_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'regularisation', 'row_label' => 'Régularisation', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_nomination_reclassement_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'nomination_reclassement', 'row_label' => 'Nomination et reclassement', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_nomination_reclassement_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'nomination_reclassement', 'row_label' => 'Nomination et reclassement', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_reclassement_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'reclassement', 'row_label' => 'Reclassement', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_reclassement_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'reclassement', 'row_label' => 'Reclassement', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_rectificatif_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'rectificatif', 'row_label' => 'Rectificatif', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_rectificatif_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'rectificatif', 'row_label' => 'Rectificatif', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_disponibilite_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'disponibilite', 'row_label' => 'Disponibilité', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_disponibilite_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'disponibilite', 'row_label' => 'Disponibilité', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_detachement_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'detachement', 'row_label' => 'Détachement', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_detachement_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'detachement', 'row_label' => 'Détachement', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_renouvellement_disponibilite_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'renouvellement_disponibilite', 'row_label' => 'Renouvellement de disponibilité', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_renouvellement_disponibilite_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'renouvellement_disponibilite', 'row_label' => 'Renouvellement de disponibilité', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_integration_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'integration', 'row_label' => 'Intégration', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_integration_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'integration', 'row_label' => 'Intégration', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_renouvellement_detachement_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'renouvellement_detachement', 'row_label' => 'Renouvellement de détachement', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_renouvellement_detachement_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'renouvellement_detachement', 'row_label' => 'Renouvellement de détachement', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_suspension_engagement_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'suspension_engagement', 'row_label' => 'Suspension d\'engagement', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t3_suspension_engagement_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'suspension_engagement', 'row_label' => 'Suspension d\'engagement', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t3_total_general_actes', 'type' => 'number', 'required' => false, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'total_general', 'row_label' => 'Total général', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'total'],
+                        ['name' => 'dsi_t3_total_general_agents', 'type' => 'number', 'required' => false, 'table' => 'tableau_3', 'table_label' => 'Répartition du nombre d’actes selon l’objet', 'row_key' => 'total_general', 'row_label' => 'Total général', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'total'],
+
+                        // Tableau 4 : Nature des actes
+                        ['name' => 'dsi_t4_arrete_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'arrete', 'row_label' => 'Arrêté', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t4_arrete_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'arrete', 'row_label' => 'Arrêté', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t4_decision_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'decision', 'row_label' => 'Décision', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t4_decision_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'decision', 'row_label' => 'Décision', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t4_decret_actes', 'type' => 'number', 'required' => true, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'decret', 'row_label' => 'Décret', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'item'],
+                        ['name' => 'dsi_t4_decret_agents', 'type' => 'number', 'required' => true, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'decret', 'row_label' => 'Décret', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'item'],
+                        ['name' => 'dsi_t4_total_actes', 'type' => 'number', 'required' => false, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'total', 'row_label' => 'Total', 'metric' => 'actes', 'metric_label' => 'Nombre d’actes', 'role' => 'total'],
+                        ['name' => 'dsi_t4_total_agents', 'type' => 'number', 'required' => false, 'table' => 'tableau_4', 'table_label' => 'Répartition des actes d’administration selon leur nature', 'row_key' => 'total', 'row_label' => 'Total', 'metric' => 'agents', 'metric_label' => 'Nombre d’agents concernés', 'role' => 'total'],
+                    ]
+                ]);
+            }
+
+            // FormConfig pour DELC
+            $delc = \App\Models\Direction::where('code', 'DELC')->first();
+            if ($delc) {
+                FormConfig::create([
+                    'ministere_id' => $mfpMinistere->id,
+                    'direction_id' => $delc->id,
+                    'fields' => [
+                        // Champs temporaires - à remplacer plus tard
+                        ['name' => 'prenom', 'label' => 'Prénom', 'type' => 'text', 'required' => true],
+                        ['name' => 'nom', 'label' => 'Nom', 'type' => 'text', 'required' => true],
+                        ['name' => 'commentaire', 'label' => 'Commentaire DELC', 'type' => 'textarea', 'required' => false],
+                    ]
+                ]);
+            }
+
+            // FormConfig pour DGC
+            $dgc = \App\Models\Direction::where('code', 'DGC')->first();
+            if ($dgc) {
+                FormConfig::create([
+                    'ministere_id' => $mfpMinistere->id,
+                    'direction_id' => $dgc->id,
+                    'fields' => [
+                        // Champs temporaires - à remplacer plus tard
+                        ['name' => 'prenom', 'label' => 'Prénom', 'type' => 'text', 'required' => true],
+                        ['name' => 'nom', 'label' => 'Nom', 'type' => 'text', 'required' => true],
+                        ['name' => 'commentaire', 'label' => 'Commentaire DGC', 'type' => 'textarea', 'required' => false],
+                    ]
+                ]);
+            }
         }
     }
 }
