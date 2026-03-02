@@ -6,20 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class DataCollection extends Model
+class FormConfig extends Model
 {
     use HasFactory;
 
-    protected $table = 'data_collections';
-
     protected $fillable = [
-        'matricule',
         'ministere_id',
-        'form_data',
+        'fields',
     ];
 
     protected $casts = [
-        'form_data' => 'array',
+        'fields' => 'array',
     ];
 
     public function ministere(): BelongsTo

@@ -28,6 +28,11 @@ class MinisteireSeeder extends Seeder
                 'code' => 'MJ',
                 'description' => null,
             ],
+            [
+                'name' => 'Autre',
+                'code' => 'AUTRE',
+                'description' => 'Autre ministère',
+            ],
         ];
 
         foreach ($ministeres as $ministere) {
