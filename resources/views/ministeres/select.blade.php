@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('progress_step', 'ministere')
+
 @section('content')
 <div class="container mx-auto px-4 py-12">
     <div class="max-w-xl mx-auto">

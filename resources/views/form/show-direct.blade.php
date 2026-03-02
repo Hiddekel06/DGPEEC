@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('progress_step', 'formulaire')
+
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-8 md:py-12">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,7 +19,7 @@
                             </svg>
                             <div>
                                 <h1 class="text-2xl font-bold text-gray-800 tracking-tight">
-                                    Les sortants du Centre de Formation Judiciaire_2025
+                                    {{ $formTitle }}
                                 </h1>
                                 <p class="text-sm text-gray-500 mt-1">
                                     Ministère : {{ $ministere->name }}
@@ -55,54 +57,120 @@
                         <input type="hidden" name="_token_form" value="{{ $token }}">
 
                         <div class="space-y-6">
-                            @foreach($formConfig->fields as $field)
-                                <div>
-                                    <label for="{{ $field['name'] }}" class="block text-sm font-medium text-gray-900 mb-2">
-                                        {{ $field['label'] }}
-                                        @if($field['required'])
-                                            <span class="text-red-500 ml-1">*</span>
-                                        @endif
-                                    </label>
+                            @php
+                                // Vérifier si c'est un formulaire BOM avec structures
+                                $hasStructures = collect($formConfig->fields)->contains(fn($f) => isset($f['structure']));
+                                if ($hasStructures) {
+                                    $structures = [
+                                        'presidence' => 'Présidence de la République',
+                                        'primature' => 'Primature',
+                                        'ministeres' => 'Ministères',
+                                        'total' => 'Total'
+                                    ];
+                                }
+                            @endphp
 
-                                    @if($field['type'] === 'text')
-                                        <input type="text" 
-                                               id="{{ $field['name'] }}" 
-                                               name="form_data[{{ $field['name'] }}]" 
-                                               value="{{ old('form_data.' . $field['name']) }}"
-                                               class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                               @if($field['required']) required @endif>
-
-                                    @elseif($field['type'] === 'date')
-                                        <input type="date" 
-                                               id="{{ $field['name'] }}" 
-                                               name="form_data[{{ $field['name'] }}]" 
-                                               value="{{ old('form_data.' . $field['name']) }}"
-                                               class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                               @if($field['required']) required @endif>
-
-                                    @elseif($field['type'] === 'select')
-                                        <select id="{{ $field['name'] }}" 
-                                                name="form_data[{{ $field['name'] }}]" 
-                                                class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                @if($field['required']) required @endif>
-                                            <option value="">-- Sélectionnez --</option>
-                                            @foreach($field['options'] as $value => $label)
-                                                <option value="{{ $value }}" @if(old('form_data.' . $field['name']) == $value) selected @endif>
-                                                    {{ $label }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
-                                    @elseif($field['type'] === 'textarea')
-                                        <textarea id="{{ $field['name'] }}" 
-                                                  name="form_data[{{ $field['name'] }}]" 
-                                                  rows="4"
-                                                  class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                  placeholder="Entrez votre texte"
-                                                  @if($field['required']) required @endif>{{ old('form_data.' . $field['name']) }}</textarea>
+                            @if($hasStructures)
+                                {{-- Affichage structuré pour BOM --}}
+                                @php
+                                    $fieldsByStructure = collect($formConfig->fields)->groupBy('structure');
+                                @endphp
+                                
+                                @foreach($structures as $key => $label)
+                                    @if($fieldsByStructure->has($key))
+                                        <div>
+                                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg p-4 mb-4">
+                                                <h3 class="text-lg font-semibold text-gray-800">{{ $label }}</h3>
+                                            </div>
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                @foreach($fieldsByStructure[$key] as $field)
+                                                    <div>
+                                                        <label for="{{ $field['name'] }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                                            {{ $field['sublabel'] ?? $field['label'] }}
+                                                            @if($field['required'])
+                                                                <span class="text-red-500">*</span>
+                                                            @endif
+                                                        </label>
+                                                        <input type="number" 
+                                                               id="{{ $field['name'] }}" 
+                                                               name="form_data[{{ $field['name'] }}]" 
+                                                               value="{{ old('form_data.' . $field['name']) }}"
+                                                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150 text-lg font-medium"
+                                                               @if($field['required']) required @endif
+                                                               min="0">
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     @endif
-                                </div>
-                            @endforeach
+                                @endforeach
+                            @else
+                                {{-- Affichage normal pour autres ministères --}}
+                                @foreach($formConfig->fields as $field)
+                                    @if($field['type'] === 'heading')
+                                        <div>
+                                            <h2 class="text-lg font-semibold text-gray-800 mt-6 mb-4 pb-3 border-b border-gray-300">
+                                                {{ $field['label'] }}
+                                            </h2>
+                                        </div>
+                                    @else
+                                        <div>
+                                            <label for="{{ $field['name'] }}" class="block text-sm font-medium text-gray-900 mb-2">
+                                                {{ $field['label'] }}
+                                                @if($field['required'])
+                                                    <span class="text-red-500 ml-1">*</span>
+                                                @endif
+                                            </label>
+
+                                            @if($field['type'] === 'text')
+                                                <input type="text" 
+                                                       id="{{ $field['name'] }}" 
+                                                       name="form_data[{{ $field['name'] }}]" 
+                                                       value="{{ old('form_data.' . $field['name']) }}"
+                                                       class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                       @if($field['required']) required @endif>
+
+                                            @elseif($field['type'] === 'number')
+                                                <input type="number" 
+                                                       id="{{ $field['name'] }}" 
+                                                       name="form_data[{{ $field['name'] }}]" 
+                                                       value="{{ old('form_data.' . $field['name']) }}"
+                                                       class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                       @if($field['required']) required @endif>
+
+                                            @elseif($field['type'] === 'date')
+                                                <input type="date" 
+                                                       id="{{ $field['name'] }}" 
+                                                       name="form_data[{{ $field['name'] }}]" 
+                                                       value="{{ old('form_data.' . $field['name']) }}"
+                                                       class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                       @if($field['required']) required @endif>
+
+                                            @elseif($field['type'] === 'select')
+                                                <select id="{{ $field['name'] }}" 
+                                                        name="form_data[{{ $field['name'] }}]" 
+                                                        class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                        @if($field['required']) required @endif>
+                                                    <option value="">-- Sélectionnez --</option>
+                                                    @foreach($field['options'] as $value => $label)
+                                                        <option value="{{ $value }}" @if(old('form_data.' . $field['name']) == $value) selected @endif>
+                                                            {{ $label }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+
+                                            @elseif($field['type'] === 'textarea')
+                                                <textarea id="{{ $field['name'] }}" 
+                                                          name="form_data[{{ $field['name'] }}]" 
+                                                          rows="4"
+                                                          class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                                          placeholder="Entrez votre texte"
+                                                          @if($field['required']) required @endif>{{ old('form_data.' . $field['name']) }}</textarea>
+                                            @endif
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @endif
                         </div>
 
                         <!-- Boutons -->

@@ -12,46 +12,8 @@ use Illuminate\Support\Str;
 
 class DataCollectionController extends Controller
 {
-    public function showMatricule(Ministere $ministere): View
+    public function showForm(Ministere $ministere): View
     {
-        return view('matricule.show', compact('ministere'));
-    }
-
-    public function validateMatricule(Request $request, Ministere $ministere): RedirectResponse
-    {
-        // Normalisation : trim + majuscules
-        $matricule = strtoupper(trim($request->input('matricule')));
-
-        // Validation format : au moins 6 chiffres + 1 lettre majuscule
-        $request->merge(['matricule' => $matricule]);
-        
-        $request->validate([
-            'matricule' => [
-                'required',
-                'regex:/^\d{6,}[A-Z]$/',
-                'unique:data_collections,matricule'
-            ]
-        ], [
-            'matricule.required' => 'Le matricule est obligatoire.',
-            'matricule.regex' => 'Le matricule doit contenir au moins 6 chiffres suivis d\'une lettre majuscule (ex: 123456A).',
-            'matricule.unique' => 'Ce matricule a déjà été utilisé pour soumettre des données.'
-        ]);
-
-        return redirect()->route('form.show', ['ministere' => $ministere, 'matricule' => $matricule]);
-    }
-
-    public function showForm(Ministere $ministere, string $matricule): View
-    {
-        // Vérifier que le matricule est valide
-        if (!preg_match('/^\d{6,}[A-Z]$/', $matricule)) {
-            abort(404);
-        }
-
-        // Vérifier que le matricule n'a pas déjà soumis
-        if (DataCollection::where('matricule', $matricule)->exists()) {
-            abort(403, 'Ce matricule a déjà soumis ses données.');
-        }
-
         // Récupérer la configuration du formulaire
         $formConfig = FormConfig::where('ministere_id', $ministere->id)->first();
 
@@ -61,24 +23,15 @@ class DataCollectionController extends Controller
 
         // Générer un token unique pour cette soumission
         $token = Str::random(64);
-        session()->put("form_token_{$ministere->id}_{$matricule}", $token);
+        session()->put("form_token_{$ministere->id}", $token);
 
-        return view('form.show', compact('ministere', 'matricule', 'formConfig', 'token'));
+        return view('form.show', compact('ministere', 'formConfig', 'token'));
     }
 
-    public function submitForm(Request $request, Ministere $ministere, string $matricule): RedirectResponse
+    public function submitForm(Request $request, Ministere $ministere): RedirectResponse
     {
-        // Vérifier le matricule
-        if (!preg_match('/^\d{6,}[A-Z]$/', $matricule)) {
-            abort(404);
-        }
-
-        if (DataCollection::where('matricule', $matricule)->exists()) {
-            abort(403, 'Ce matricule a déjà soumis ses données.');
-        }
-
         // Vérifier le token anti-spam
-        $tokenKey = "form_token_{$ministere->id}_{$matricule}";
+        $tokenKey = "form_token_{$ministere->id}";
         $sessionToken = session()->get($tokenKey);
         $requestToken = $request->input('_token_form');
 
@@ -103,12 +56,24 @@ class DataCollectionController extends Controller
             if ($field['type'] === 'date') {
                 $fieldRules[] = 'date';
             }
+            // Validation spéciale pour le matricule
+            if ($field['name'] === 'matricule') {
+                $fieldRules[] = 'regex:/^\d{6,}[A-Z]$/';
+                $fieldRules[] = 'unique:data_collections,matricule';
+            }
             if (!empty($fieldRules)) {
                 $rules['form_data.' . $field['name']] = $fieldRules;
             }
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'form_data.matricule.regex' => 'Le matricule doit contenir au moins 6 chiffres suivis d\'une lettre majuscule (ex: 123456A).',
+            'form_data.matricule.unique' => 'Ce matricule a déjà été utilisé pour soumettre des données.'
+        ]);
+
+        // Normaliser le matricule
+        $matricule = strtoupper(trim($validated['form_data']['matricule']));
+        $validated['form_data']['matricule'] = $matricule;
 
         // Créer la soumission
         DataCollection::create([
@@ -125,8 +90,8 @@ class DataCollectionController extends Controller
 
     public function showFormDirect(Ministere $ministere): View
     {
-        // Vérifier que c'est bien le CFJ
-        if ($ministere->code !== 'CFJ') {
+        // Vérifier que c'est bien un ministère en flux direct
+        if (!in_array($ministere->code, ['CFJ', 'CNFTEFCPN', 'APEN'], true)) {
             abort(403, 'Accès non autorisé');
         }
 
@@ -141,13 +106,20 @@ class DataCollectionController extends Controller
         $token = Str::random(64);
         session()->put("form_token_cfj_{$token}", $token);
 
-        return view('form.show-direct', compact('ministere', 'formConfig', 'token'));
+        $formTitle = match ($ministere->code) {
+            'CFJ' => 'Les sortants du Centre de Formation Judiciaire_2025',
+            'CNFTEFCPN' => 'Les sortants du Centre national de fonction des techniciens des Eaux et Forêts, Chasses et Parcs nationaux (CNFTEFCPN)',
+            'APEN' => 'Les recrues de l’administration pénitentiaire',
+            default => 'Formulaire de collecte 2025',
+        };
+
+        return view('form.show-direct', compact('ministere', 'formConfig', 'token', 'formTitle'));
     }
 
     public function submitFormDirect(Request $request, Ministere $ministere): RedirectResponse
     {
-        // Vérifier que c'est bien le CFJ
-        if ($ministere->code !== 'CFJ') {
+        // Vérifier que c'est bien un ministère en flux direct
+        if (!in_array($ministere->code, ['CFJ', 'CNFTEFCPN', 'APEN'], true)) {
             abort(403, 'Accès non autorisé');
         }
 
@@ -214,6 +186,6 @@ class DataCollectionController extends Controller
 
     public function success(): View
     {
-        return view('form.success');
+        return view('data-collections.success');
     }
 }

@@ -14,17 +14,18 @@ class MinisteireSeeder extends Seeder
     {
         $ministeres = [
             [
-                'name' => 'Ministere fonction publique',
+                'name' => 'Ministere de la fonction publique',
                 'code' => 'MFP',
                 'description' => null,
+                'requires_authentication' => true,
             ],
             [
-                'name' => 'Ministere environnement',
+                'name' => 'Ministere de l\'environnement',
                 'code' => 'ME',
                 'description' => null,
             ],
             [
-                'name' => 'Ministere justice',
+                'name' => 'Ministere de la justice',
                 'code' => 'MJ',
                 'description' => null,
             ],
@@ -37,6 +38,27 @@ class MinisteireSeeder extends Seeder
                 'name' => 'Sortants de l’ENA',
                 'code' => 'ENA',
                 'description' => null,
+            ],
+            [
+                'name' => 'Centre national de fonction des techniciens des Eaux et Forêts, Chasses et Parcs nationaux (CNFTEFCPN)',
+                'code' => 'CNFTEFCPN',
+                'description' => null,
+            ],
+            [
+                'name' => 'Recrues de l’administration pénitentiaire',
+                'code' => 'APEN',
+                'description' => null,
+            ],
+            [
+                'name' => 'Ministère des finances et du budget',
+                'code' => 'MFB',
+                'description' => null,
+            ],
+            [
+                'name' => 'Bureau d\'Organisation et de Méthode',
+                'code' => 'BOM',
+                'description' => null,
+                'requires_authentication' => true,
             ],
             [
                 'name' => 'Autre',

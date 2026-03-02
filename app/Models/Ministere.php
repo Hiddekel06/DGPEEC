@@ -16,6 +16,7 @@ class Ministere extends Model
         'name',
         'code',
         'description',
+        'requires_authentication',
     ];
 
     public function dataCollections(): HasMany
