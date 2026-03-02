@@ -23,6 +23,11 @@ class MinisteireController extends Controller
 
         $ministere = Ministere::findOrFail($request->ministere_id);
         
+        // Vérifier si c'est le Centre de Formation Judiciaire (CFJ)
+        if ($ministere->code === 'CFJ') {
+            return redirect()->route('form.show-direct', $ministere);
+        }
+        
         return redirect()->route('matricule.show', $ministere);
     }
 }

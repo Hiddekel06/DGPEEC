@@ -44,5 +44,42 @@ class FormConfigSeeder extends Seeder
                 ]
             ]);
         }
+
+        // Configuration pour le Centre de Formation Judiciaire
+        $cfjMinistere = Ministere::where('code', 'CFJ')->first();
+
+        if ($cfjMinistere) {
+            FormConfig::create([
+                'ministere_id' => $cfjMinistere->id,
+                'fields' => [
+                    ['name' => 'prenom', 'label' => 'Prénom', 'type' => 'text', 'required' => true],
+                    ['name' => 'nom', 'label' => 'Nom', 'type' => 'text', 'required' => true],
+                    ['name' => 'voie_acces', 'label' => 'Voie d\'accès', 'type' => 'text', 'required' => true],
+                    ['name' => 'section', 'label' => 'Section', 'type' => 'text', 'required' => true],
+                    ['name' => 'corps', 'label' => 'Corps', 'type' => 'text', 'required' => true],
+                    ['name' => 'hierarchie_sortie', 'label' => 'Hiérarchie de sortie', 'type' => 'text', 'required' => true],
+                ]
+            ]);
+        }
+
+        // Configuration pour les sortants de l’ENA
+        $enaMinistere = Ministere::where('code', 'ENA')->first();
+
+        if ($enaMinistere) {
+            FormConfig::create([
+                'ministere_id' => $enaMinistere->id,
+                'fields' => [
+                    ['name' => 'prenom', 'label' => 'Prénom', 'type' => 'text', 'required' => true],
+                    ['name' => 'nom', 'label' => 'Nom', 'type' => 'text', 'required' => true],
+                    ['name' => 'voie_acces', 'label' => 'Voie d\'accès', 'type' => 'select', 'required' => true, 'options' => [
+                        'concours_direct' => 'Concours direct',
+                        'professionnel' => 'Professionnel',
+                    ]],
+                    ['name' => 'section', 'label' => 'Section', 'type' => 'text', 'required' => true],
+                    ['name' => 'corps', 'label' => 'Corps', 'type' => 'text', 'required' => true],
+                    ['name' => 'hierarchie_sortie', 'label' => 'Hiérarchie de sortie', 'type' => 'text', 'required' => true],
+                ]
+            ]);
+        }
     }
 }

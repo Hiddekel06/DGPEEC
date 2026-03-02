@@ -29,6 +29,16 @@ class MinisteireSeeder extends Seeder
                 'description' => null,
             ],
             [
+                'name' => 'Centre de Formation Judiciaire',
+                'code' => 'CFJ',
+                'description' => null,
+            ],
+            [
+                'name' => 'Sortants de l’ENA',
+                'code' => 'ENA',
+                'description' => null,
+            ],
+            [
                 'name' => 'Autre',
                 'code' => 'AUTRE',
                 'description' => 'Autre ministère',
