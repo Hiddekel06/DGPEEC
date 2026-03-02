@@ -78,6 +78,10 @@
 
                             // Vérifier si c'est un formulaire BOM avec structures
                             $hasStructures = collect($formConfig->fields)->contains(fn($f) => isset($f['structure']));
+                            
+                            // Vérifier si c'est un formulaire DELC avec repeatable_group
+                            $hasRepeatableGroups = collect($formConfig->fields)->contains(fn($f) => isset($f['repeatable_group']) && $f['repeatable_group'] !== null);
+                            
                             if ($hasStructures) {
                                 $structures = [
                                     'presidence' => 'Présidence de la République',
@@ -88,7 +92,124 @@
                             }
                         @endphp
 
-                        @if($hasTabularFields)
+                        @if($hasRepeatableGroups)
+                            {{-- Formulaire DELC avec repeaters --}}
+                            @php
+                                $fieldsByGroup = collect($formConfig->fields)->groupBy(fn($f) => $f['repeatable_group'] ?? 'null');
+                                $headings = $fieldsByGroup->get(null, collect());
+                                $repeatableGroups = $fieldsByGroup->filter(fn($v, $k) => $k !== 'null');
+                            @endphp
+
+                            @foreach($headings as $heading)
+                                @if($heading['type'] === 'heading')
+                                    <div class="md:col-span-2">
+                                        <h2 class="text-lg font-semibold text-gray-800 mt-6 mb-4 pb-3 border-b-2 border-green-500">
+                                            {{ $heading['label'] }}
+                                        </h2>
+                                    </div>
+
+                                    @php
+                                        $groupKey = collect($formConfig->fields)
+                                            ->skipUntil(fn($f) => $f['name'] === $heading['name'])
+                                            ->skip(1)
+                                            ->first()['repeatable_group'] ?? null;
+                                    @endphp
+
+                                    @if($groupKey && isset($fieldsByGroup[$groupKey]))
+                                        <div class="md:col-span-2" data-repeatable-group="{{ $groupKey }}">
+                                            <div class="space-y-4">
+                                                <!-- Template de ligne -->
+                                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                                    <p class="text-sm text-blue-700 mb-3 font-medium">📋 Structure du formulaire</p>
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 bg-white p-3 rounded">
+                                                        @foreach($fieldsByGroup[$groupKey] as $field)
+                                                            @if($field['type'] !== 'heading')
+                                                                <div class="text-xs">
+                                                                    <span class="font-semibold text-gray-700">{{ $field['label'] }}</span>
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tableau des lignes -->
+                                                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                                    <table class="min-w-full divide-y divide-gray-200 bg-white">
+                                                        <thead class="bg-gray-50">
+                                                            <tr>
+                                                                @foreach($fieldsByGroup[$groupKey] as $field)
+                                                                    @if($field['type'] !== 'heading')
+                                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                                            {{ $field['label'] }}
+                                                                        </th>
+                                                                    @endif
+                                                                @endforeach
+                                                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-12">Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="table-{{ $groupKey }}" class="divide-y divide-gray-100">
+                                                            <!-- Les lignes seront insérées ici par JavaScript -->
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <!-- Bouton ajouter -->
+                                                <button type="button" 
+                                                        class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                        onclick="addRepeatableRow('{{ $groupKey }}', {{ json_encode($fieldsByGroup[$groupKey]->where('type', '!=', 'heading')->toArray()) }})">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                    </svg>
+                                                    Ajouter une ligne
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
+                            @endforeach
+
+                            <script>
+                                function addRepeatableRow(groupKey, fields) {
+                                    const table = document.getElementById(`table-${groupKey}`);
+                                    const rowCount = table.querySelectorAll('tr').length + 1;
+                                    const row = document.createElement('tr');
+                                    row.className = 'bg-white hover:bg-gray-50 repeatable-row';
+                                    row.id = `row-${groupKey}-temp-${Date.now()}`;
+                                    
+                                    let html = '';
+                                    fields.forEach(field => {
+                                        const fieldName = `repeatable[${groupKey}][${rowCount}][${field['name'].split('_').pop()}]`;
+                                        
+                                        html += '<td class="px-4 py-3">';
+                                        if (field['type'] === 'text') {
+                                            html += `<input type="text" name="${fieldName}" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500" placeholder="${field['label']}">`;
+                                        } else if (field['type'] === 'select') {
+                                            html += `<select name="${fieldName}" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500"><option value="">--</option>`;
+                                            if (field['options']) {
+                                                Object.entries(field['options']).forEach(([val, lbl]) => {
+                                                    html += `<option value="${val}">${lbl}</option>`;
+                                                });
+                                            }
+                                            html += '</select>';
+                                        } else if (field['type'] === 'number') {
+                                            html += `<input type="number" min="0" name="${fieldName}" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500" placeholder="${field['label']}">`;
+                                        } else if (field['type'] === 'textarea') {
+                                            html += `<textarea name="${fieldName}" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-green-500" rows="2" placeholder="${field['label']}"></textarea>`;
+                                        }
+                                        html += '</td>';
+                                    });
+                                    
+                                    html += '<td class="px-4 py-3 text-center"><button type="button" class="text-red-600 hover:text-red-800 font-bold" onclick="removeRow(this)">✕</button></td>';
+                                    
+                                    row.innerHTML = html;
+                                    table.appendChild(row);
+                                }
+                                
+                                function removeRow(btn) {
+                                    btn.closest('tr').remove();
+                                }
+                            </script>
+                        @elseif($hasTabularFields)
                             @php
                                 $tables = collect($formConfig->fields)->groupBy('table');
                             @endphp

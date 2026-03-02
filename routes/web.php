@@ -22,3 +22,18 @@ Route::get('/formulaire-cfj/{ministere}', [DataCollectionController::class, 'sho
 Route::post('/formulaire-cfj/{ministere}', [DataCollectionController::class, 'submitFormDirect'])->middleware('check.agent.auth')->name('form.submit-direct');
 
 Route::get('/success', [DataCollectionController::class, 'success'])->name('form.success');
+
+// Routes AJAX pour DELC
+Route::prefix('/ajax/formulaire/{ministere}')->middleware('check.agent.auth')->group(function () {
+    // Sanctions
+    Route::post('/sanctions/store', [DataCollectionController::class, 'storeSanctionLine'])->name('delc.sanction.store');
+    Route::delete('/sanctions/{line}', [DataCollectionController::class, 'destroySanctionLine'])->name('delc.sanction.destroy');
+    
+    // Contentieux
+    Route::post('/contentieux/store', [DataCollectionController::class, 'storeContentieuxLine'])->name('delc.contentieux.store');
+    Route::delete('/contentieux/{line}', [DataCollectionController::class, 'destroyContentieuxLine'])->name('delc.contentieux.destroy');
+    
+    // Diplômes
+    Route::post('/diplomes/store', [DataCollectionController::class, 'storeDiplomeLine'])->name('delc.diplome.store');
+    Route::delete('/diplomes/{line}', [DataCollectionController::class, 'destroyDiplomeLine'])->name('delc.diplome.destroy');
+});

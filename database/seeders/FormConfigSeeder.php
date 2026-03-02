@@ -327,10 +327,32 @@ class FormConfigSeeder extends Seeder
                     'ministere_id' => $mfpMinistere->id,
                     'direction_id' => $delc->id,
                     'fields' => [
-                        // Champs temporaires - à remplacer plus tard
-                        ['name' => 'prenom', 'label' => 'Prénom', 'type' => 'text', 'required' => true],
-                        ['name' => 'nom', 'label' => 'Nom', 'type' => 'text', 'required' => true],
-                        ['name' => 'commentaire', 'label' => 'Commentaire DELC', 'type' => 'textarea', 'required' => false],
+                        // Section 1 : Sanctions du conseil de discipline
+                        ['name' => 'delc_section_1_heading', 'type' => 'heading', 'label' => 'Les sanctions prononcées à la suite de la saisine du conseil de discipline', 'repeatable_group' => null],
+                        
+                        ['name' => 'delc_sanction_corps_0', 'type' => 'text', 'label' => 'Corps ou Emplois', 'required' => true, 'repeatable_group' => 'sanctions', 'table' => 'delc_sanction_lines'],
+                        ['name' => 'delc_sanction_sexe_0', 'type' => 'select', 'label' => 'Sexe', 'required' => true, 'repeatable_group' => 'sanctions', 'table' => 'delc_sanction_lines', 'options' => ['M' => 'Masculin', 'F' => 'Féminin']],
+                        ['name' => 'delc_sanction_sanction_0', 'type' => 'text', 'label' => 'Sanction', 'required' => true, 'repeatable_group' => 'sanctions', 'table' => 'delc_sanction_lines'],
+                        ['name' => 'delc_sanction_motif_0', 'type' => 'textarea', 'label' => 'Motif', 'required' => false, 'repeatable_group' => 'sanctions', 'table' => 'delc_sanction_lines'],
+
+                        // Section 2 : Gestion du contentieux
+                        ['name' => 'delc_section_2_heading', 'type' => 'heading', 'label' => 'Gestion du contentieux - Les actes pris suite au traitement des dossiers de contentieux', 'repeatable_group' => null],
+                        
+                        ['name' => 'delc_contentieux_corps_0', 'type' => 'text', 'label' => 'Corps ou Emplois', 'required' => true, 'repeatable_group' => 'contentieux', 'table' => 'delc_contentieux_lines'],
+                        ['name' => 'delc_contentieux_sexe_0', 'type' => 'select', 'label' => 'Sexe', 'required' => true, 'repeatable_group' => 'contentieux', 'table' => 'delc_contentieux_lines', 'options' => ['M' => 'Masculin', 'F' => 'Féminin']],
+                        ['name' => 'delc_contentieux_sanction_0', 'type' => 'text', 'label' => 'Sanction', 'required' => true, 'repeatable_group' => 'contentieux', 'table' => 'delc_contentieux_lines'],
+                        ['name' => 'delc_contentieux_motif_0', 'type' => 'textarea', 'label' => 'Motif', 'required' => false, 'repeatable_group' => 'contentieux', 'table' => 'delc_contentieux_lines'],
+
+                        // Section 3 : Demandes de reconnaissance
+                        ['name' => 'delc_section_3_heading', 'type' => 'heading', 'label' => 'Les demandes de reconnaissance, de classement et d\'équivalence reçues', 'repeatable_group' => null],
+                        
+                        ['name' => 'delc_diplome_diplome_0', 'type' => 'text', 'label' => 'Diplôme', 'required' => true, 'repeatable_group' => 'diplomes', 'table' => 'delc_diplome_lines'],
+                        ['name' => 'delc_diplome_nb_demandes_0', 'type' => 'number', 'label' => 'Nombre de demandes de classement reçues', 'required' => false, 'repeatable_group' => 'diplomes', 'table' => 'delc_diplome_lines'],
+                        ['name' => 'delc_diplome_nb_attestations_0', 'type' => 'number', 'label' => 'Nombre d\'attestations de classement délivré', 'required' => false, 'repeatable_group' => 'diplomes', 'table' => 'delc_diplome_lines'],
+                        ['name' => 'delc_diplome_nb_lettres_0', 'type' => 'number', 'label' => 'Nombre de lettres de non classement de diplôme', 'required' => false, 'repeatable_group' => 'diplomes', 'table' => 'delc_diplome_lines'],
+                        ['name' => 'delc_diplome_motif_0', 'type' => 'textarea', 'label' => 'Motif de non classement du diplôme', 'required' => false, 'repeatable_group' => 'diplomes', 'table' => 'delc_diplome_lines'],
+                        ['name' => 'delc_diplome_avec_equivalence_0', 'type' => 'number', 'label' => 'Avec équivalence', 'required' => false, 'repeatable_group' => 'diplomes', 'table' => 'delc_diplome_lines'],
+                        ['name' => 'delc_diplome_sans_equivalence_0', 'type' => 'number', 'label' => 'Sans équivalence', 'required' => false, 'repeatable_group' => 'diplomes', 'table' => 'delc_diplome_lines'],
                     ]
                 ]);
             }

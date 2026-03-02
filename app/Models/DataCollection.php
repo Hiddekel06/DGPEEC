@@ -26,4 +26,19 @@ class DataCollection extends Model
     {
         return $this->belongsTo(Ministere::class);
     }
+
+    public function delcSanctionLines()
+    {
+        return $this->hasMany(DelcSanctionLine::class);
+    }
+
+    public function delcContentieuxLines()
+    {
+        return $this->hasMany(DelcContentieuxLine::class);
+    }
+
+    public function delcDiplomaLines()
+    {
+        return $this->hasMany(DelcDiplomeLine::class);
+    }
 }

@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\DataCollection;
 use App\Models\Ministere;
 use App\Models\FormConfig;
+use App\Models\DelcSanctionLine;
+use App\Models\DelcContentieuxLine;
+use App\Models\DelcDiplomeLine;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
 
@@ -285,5 +289,97 @@ class DataCollectionController extends Controller
         }
 
         return $formData;
+    }
+
+    // ==================== ENDPOINTS AJAX DELC ====================
+
+    public function storeSanctionLine(Request $request, Ministere $ministere): JsonResponse
+    {
+        $validated = $request->validate([
+            'data_collection_id' => 'required|exists:data_collections,id',
+            'corps' => 'required|string|max:255',
+            'sexe' => 'required|in:M,F',
+            'sanction' => 'required|string|max:255',
+            'motif' => 'nullable|string',
+        ]);
+
+        $line = DelcSanctionLine::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'data' => $line,
+            'message' => 'Ligne de sanction ajoutée avec succès'
+        ]);
+    }
+
+    public function destroySanctionLine(Request $request, Ministere $ministere, DelcSanctionLine $line): JsonResponse
+    {
+        $line->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ligne de sanction supprimée'
+        ]);
+    }
+
+    public function storeContentieuxLine(Request $request, Ministere $ministere): JsonResponse
+    {
+        $validated = $request->validate([
+            'data_collection_id' => 'required|exists:data_collections,id',
+            'corps' => 'required|string|max:255',
+            'sexe' => 'required|in:M,F',
+            'sanction' => 'required|string|max:255',
+            'motif' => 'nullable|string',
+        ]);
+
+        $line = DelcContentieuxLine::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'data' => $line,
+            'message' => 'Ligne de contentieux ajoutée avec succès'
+        ]);
+    }
+
+    public function destroyContentieuxLine(Request $request, Ministere $ministere, DelcContentieuxLine $line): JsonResponse
+    {
+        $line->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ligne de contentieux supprimée'
+        ]);
+    }
+
+    public function storeDiplomeLine(Request $request, Ministere $ministere): JsonResponse
+    {
+        $validated = $request->validate([
+            'data_collection_id' => 'required|exists:data_collections,id',
+            'diplome' => 'required|string|max:255',
+            'nb_demandes_classement' => 'nullable|integer|min:0',
+            'nb_attestations_classement' => 'nullable|integer|min:0',
+            'nb_lettres_non_classement' => 'nullable|integer|min:0',
+            'motif_non_classement' => 'nullable|string',
+            'avec_equivalence' => 'nullable|integer|min:0',
+            'sans_equivalence' => 'nullable|integer|min:0',
+        ]);
+
+        $line = DelcDiplomeLine::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'data' => $line,
+            'message' => 'Diplôme ajouté avec succès'
+        ]);
+    }
+
+    public function destroyDiplomeLine(Request $request, Ministere $ministere, DelcDiplomeLine $line): JsonResponse
+    {
+        $line->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Diplôme supprimé'
+        ]);
     }
 }
