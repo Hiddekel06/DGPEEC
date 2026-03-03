@@ -66,10 +66,10 @@
     <!-- Footer amélioré : plus complet et aéré, tout en restant sobre -->
     <footer class="bg-gradient-to-r from-green-700 to-emerald-800 text-white mt-12 shadow-inner">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start justify-center text-center">
                 <!-- Colonne 1 : copyright + petite description -->
                 <div class="space-y-2">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-center gap-2">
                         <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -77,8 +77,8 @@
                         </div>
                         <span class="text-sm font-semibold tracking-wide">Collecte 2025</span>
                     </div>
-                    <p class="text-xs text-green-100 leading-relaxed max-w-xs">
-                        Plateforme sécurisée de recensement des agents de l'État.
+                    <p class="text-xs text-green-100 leading-relaxed max-w-xs mx-auto">
+                        Plateforme de recensement des agents de l'État.
                     </p>
                     <p class="text-xs text-green-200/70 mt-2">
                         &copy; {{ date('Y') }} MFPTRSP/DSI
