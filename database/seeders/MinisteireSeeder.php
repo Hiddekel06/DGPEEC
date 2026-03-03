@@ -55,7 +55,7 @@ class MinisteireSeeder extends Seeder
                 'description' => null,
             ],
             [
-                'name' => 'Bureau d\'Organisation et de Méthode',
+                'name' => 'BOM',
                 'code' => 'BOM',
                 'description' => null,
                 'requires_authentication' => true,

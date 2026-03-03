@@ -45,7 +45,7 @@
 
                 <!-- Indicateur de progression dynamique -->
                 <div class="hidden sm:flex items-center gap-3 text-xs text-gray-600">
-                    <span class="font-medium {{ $stepNumber >= 1 ? 'text-green-700' : 'text-gray-400' }}">Ministère</span>
+                    <span class="font-medium {{ $stepNumber >= 1 ? 'text-green-700' : 'text-gray-400' }}">Strucure</span>
                     <span class="{{ $stepNumber >= 1 ? 'text-green-600' : 'text-gray-300' }}">●</span>
                     <span class="font-medium {{ $stepNumber >= 2 ? 'text-green-700' : 'text-gray-400' }}">Formulaire</span>
                     <span class="{{ $stepNumber >= 2 ? 'text-green-600' : 'text-gray-300' }}">●</span>
@@ -81,30 +81,17 @@
                         Plateforme sécurisée de recensement des agents de l'État.
                     </p>
                     <p class="text-xs text-green-200/70 mt-2">
-                        &copy; {{ date('Y') }} Tous droits réservés.
+                        &copy; {{ date('Y') }} MFPTRSP/DSI
                     </p>
                 </div>
 
                 <!-- Colonne 2 : liens rapides (utiles pour le footer) -->
                 <div class="space-y-2">
-                    <h3 class="text-sm font-semibold text-white tracking-wide">Liens utiles</h3>
-                    <ul class="space-y-1 text-xs text-green-100">
-                        <li><a href="#" class="hover:text-white transition duration-150">Mentions légales</a></li>
-                        <li><a href="#" class="hover:text-white transition duration-150">Politique de confidentialité</a></li>
-                        <li><a href="#" class="hover:text-white transition duration-150">Contact</a></li>
-                    </ul>
+
                 </div>
 
                 <!-- Colonne 3 : contact ou information supplémentaire -->
-                <div class="space-y-2">
-                    <h3 class="text-sm font-semibold text-white tracking-wide">Ministère de tutelle</h3>
-                    <p class="text-xs text-green-100">Ministère de la Fonction Publique<br>Direction des Systemes d'informations</p>
-                    <div class="flex items-center gap-2 text-xs text-green-100 mt-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span>contact@collecte.gouv.ci</span>
-                    </div>
+        
                 </div>
             </div>
 
