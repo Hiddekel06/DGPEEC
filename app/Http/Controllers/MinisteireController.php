@@ -18,12 +18,18 @@ class MinisteireController extends Controller
     {
         $ministere = Ministere::where('code', $code)->firstOrFail();
         
-        $filePath = public_path("templates/{$code}/maquette.pdf");
+        $templateDir = public_path("templates/{$code}");
         
-        if (!file_exists($filePath)) {
+        // Chercher le premier fichier PDF dans le dossier
+        $files = glob($templateDir . "/*.pdf");
+        
+        if (empty($files)) {
             abort(404, "La maquette n'existe pas pour ce ministère.");
         }
         
-        return response()->download($filePath, "{$ministere->name}-maquette.pdf");
+        $filePath = $files[0];
+        $fileName = basename($filePath);
+        
+        return response()->download($filePath, "{$ministere->name}-{$fileName}");
     }
 }

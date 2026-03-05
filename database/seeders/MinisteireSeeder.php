@@ -12,39 +12,47 @@ class MinisteireSeeder extends Seeder
      */
     public function run(): void
     {
-        // Créer d'abord le ministère parent
-        $minfp = Ministere::create([
-            'name' => 'Ministère de la Fonction Publique',
-            'code' => 'MFPTRSP',
-            'description' => 'Sélectionnez une division',
-            'requires_authentication' => false,
-            'parent_id' => null,
-        ]);
+        // Mettre à jour ou créer le ministère parent (utiliser le nom comme clé unique)
+        $minfp = Ministere::updateOrCreate(
+            ['name' => 'Ministère de la Fonction Publique'],
+            [
+                'code' => 'MFPTRSP',
+                'description' => 'Sélectionnez une division',
+                'requires_authentication' => false,
+                'parent_id' => null,
+            ]
+        );
 
-        // Créer les divisions enfants
-        Ministere::create([
-            'name' => 'Direction de la Stratégie Informatique',
-            'code' => 'DSI',
-            'description' => 'Division DSI',
-            'requires_authentication' => false,
-            'parent_id' => $minfp->id,
-        ]);
+        // Créer les divisions enfants (ou mettre à jour si existantes)
+        Ministere::updateOrCreate(
+            ['code' => 'DSI'],
+            [
+                'name' => 'DSI',
+                'description' => null,
+                'requires_authentication' => false,
+                'parent_id' => $minfp->id,
+            ]
+        );
 
-        Ministere::create([
-            'name' => 'DELC',
-            'code' => 'DELC',
-            'description' => 'Division DELC',
-            'requires_authentication' => false,
-            'parent_id' => $minfp->id,
-        ]);
+        Ministere::updateOrCreate(
+            ['code' => 'DELC'],
+            [
+                'name' => 'DELC',
+                'description' => null,
+                'requires_authentication' => false,
+                'parent_id' => $minfp->id,
+            ]
+        );
 
-        Ministere::create([
-            'name' => 'DGC',
-            'code' => 'DGC',
-            'description' => 'Division DGC',
-            'requires_authentication' => false,
-            'parent_id' => $minfp->id,
-        ]);
+        Ministere::updateOrCreate(
+            ['code' => 'DGC'],
+            [
+                'name' => 'DGC',
+                'description' => null,
+                'requires_authentication' => false,
+                'parent_id' => $minfp->id,
+            ]
+        );
 
         // Autres ministères
         $ministeres = [
@@ -105,7 +113,10 @@ class MinisteireSeeder extends Seeder
         ];
 
         foreach ($ministeres as $ministere) {
-            Ministere::create($ministere);
+            Ministere::updateOrCreate(
+                ['code' => $ministere['code']],
+                $ministere
+            );
         }
     }
 }
