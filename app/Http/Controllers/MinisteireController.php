@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ministere;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class MinisteireController extends Controller
 {
@@ -15,25 +14,16 @@ class MinisteireController extends Controller
         return view('ministeres.select', compact('ministeres'));
     }
 
-    public function handleSelection(Request $request): RedirectResponse
+    public function downloadTemplate(string $code): BinaryFileResponse
     {
-        $request->validate([
-            'ministere_id' => 'required|exists:ministeres,id'
-        ]);
-
-        $ministere = Ministere::findOrFail($request->ministere_id);
+        $ministere = Ministere::where('code', $code)->firstOrFail();
         
-        // Vérifier si le ministère nécessite une authentification
-        if ($ministere->requires_authentication) {
-            return redirect()->route('auth.login-form', $ministere);
+        $filePath = public_path("templates/{$code}/maquette.pdf");
+        
+        if (!file_exists($filePath)) {
+            abort(404, "La maquette n'existe pas pour ce ministère.");
         }
         
-        // Ministères en flux direct (sans matricule)
-        if (in_array($ministere->code, ['CFJ', 'CNFTEFCPN', 'APEN'], true)) {
-            return redirect()->route('form.show-direct', $ministere);
-        }
-        
-        // Redirection directe vers le formulaire
-        return redirect()->route('form.show', $ministere);
+        return response()->download($filePath, "{$ministere->name}-maquette.pdf");
     }
 }

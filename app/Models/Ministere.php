@@ -17,6 +17,7 @@ class Ministere extends Model
         'code',
         'description',
         'requires_authentication',
+        'parent_id',
     ];
 
     public function dataCollections(): HasMany
@@ -27,5 +28,17 @@ class Ministere extends Model
     public function directions(): HasMany
     {
         return $this->hasMany(Direction::class);
+    }
+
+    // Parent ministère (si c'est une division)
+    public function parent()
+    {
+        return $this->belongsTo(Ministere::class, 'parent_id');
+    }
+
+    // Divisions enfants (si c'est un ministère parent)
+    public function divisions()
+    {
+        return $this->hasMany(Ministere::class, 'parent_id');
     }
 }

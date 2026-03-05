@@ -11,16 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
-            'check.agent.auth' => \App\Http\Middleware\CheckAgentAuthentication::class,
-        ]);
-
-        $middleware->validateCsrfTokens(except: [
-            'ministere/select',
-            'auth/*',
-            'formulaire/*',
-            'formulaire-cfj/*',
-        ]);
+        //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
