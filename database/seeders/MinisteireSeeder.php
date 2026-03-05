@@ -81,18 +81,6 @@ class MinisteireSeeder extends Seeder
                 'requires_authentication' => false,
             ],
             [
-                'name' => 'Centre national de fonction des techniciens des Eaux et Forêts, Chasses et Parcs nationaux (CNFTEFCPN)',
-                'code' => 'CNFTEFCPN',
-                'description' => null,
-                'requires_authentication' => false,
-            ],
-            [
-                'name' => 'Recrues de l\'administration pénitentiaire',
-                'code' => 'APEN',
-                'description' => null,
-                'requires_authentication' => false,
-            ],
-            [
                 'name' => 'Ministère des finances et du budget',
                 'code' => 'MFB',
                 'description' => null,
@@ -105,9 +93,9 @@ class MinisteireSeeder extends Seeder
                 'requires_authentication' => true,
             ],
             [
-                'name' => 'Autres Administrations',
+                'name' => 'Autres ministères ou administrations',
                 'code' => 'AUTRE',
-                'description' => 'Autre administration ',
+                'description' => null,
                 'requires_authentication' => false,
             ],
         ];

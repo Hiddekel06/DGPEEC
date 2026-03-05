@@ -8,22 +8,6 @@
 </head>
 <body class="bg-gradient-to-br from-green-50 to-emerald-50 min-h-screen flex flex-col">
 
-    @php
-        $currentStep = trim($__env->yieldContent('progress_step'));
-        $steps = [
-            'ministere' => 1,
-            'formulaire' => 2,
-            'confirmation' => 3,
-        ];
-        $stepNumber = $steps[$currentStep] ?? 1;
-        $progressWidth = match ($stepNumber) {
-            1 => 'w-1/3',
-            2 => 'w-2/3',
-            3 => 'w-full',
-            default => 'w-1/3',
-        };
-    @endphp
-
     <!-- Header amélioré : plus élégant, avec verre dépoli et ombre douce -->
     <header class="bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm sticky top-0 z-10">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -42,20 +26,7 @@
                         </p>
                     </div>
                 </div>
-
-                <!-- Indicateur de progression dynamique -->
-                <div class="hidden sm:flex items-center gap-3 text-xs text-gray-600">
-                    <span class="font-medium {{ $stepNumber >= 1 ? 'text-green-700' : 'text-gray-400' }}">Strucure</span>
-                    <span class="{{ $stepNumber >= 1 ? 'text-green-600' : 'text-gray-300' }}">●</span>
-                    <span class="font-medium {{ $stepNumber >= 2 ? 'text-green-700' : 'text-gray-400' }}">Formulaire</span>
-                    <span class="{{ $stepNumber >= 2 ? 'text-green-600' : 'text-gray-300' }}">●</span>
-                    <span class="font-medium {{ $stepNumber >= 3 ? 'text-green-700' : 'text-gray-400' }}">Confirmation</span>
-                </div>
             </div>
-        </div>
-        <!-- Fine barre de progression (effet visuel) -->
-        <div class="h-0.5 w-full bg-gray-100">
-            <div class="h-0.5 {{ $progressWidth }} bg-gradient-to-r from-green-500 to-emerald-500 rounded-r-full transition-all duration-300"></div>
         </div>
     </header>
 
@@ -68,7 +39,7 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start justify-center text-center">
                 <!-- Colonne 1 : copyright + petite description -->
-                <div class="space-y-2">
+                <div class="md:col-span-full space-y-2">
                     <div class="flex items-center justify-center gap-2">
                         <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
